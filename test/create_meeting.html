@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Unique ID Generator</title>
+    <style>
+       body{
+    /* background: url(conference_bg.gif) ;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover; */
+    background-color: black;
+   }
+   #PROCEED {
+  background-color: rgb(250, 250, 252);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+    </style>
+</head>
+
+<body>
+    <center>
+        <br>
+    <h1 style="color: rgb(249, 249, 248);">Random Unique ID:</h1>
+    <p id="randomId" style="color: white;"></p>
+
+    <script>
+        // Function to generate a random unique ID
+        function generateUniqueId() {
+            const timestamp = Date.now().toString(36); // Convert current timestamp to base36
+            const randomPart = Math.random().toString(36).substr(2, 5); // Generate a random string
+            return timestamp + randomPart;
+        }
+
+        // Generate and display the random unique ID
+        const randomId = generateUniqueId();
+        document.getElementById("randomId").textContent = randomId;
+        
+    </script>
+    <button id="PROCEED">
+        <a href="conference_admin.html" style="text-emphasis-color: white;">PROCEED</a>
+    </button>
+    </center>
+    
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<p style="color: white; text-align: right;"><br><br><br>TEAM ANONYMOUS</p>
+</body>
+</html>
+

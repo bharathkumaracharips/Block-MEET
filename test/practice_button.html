@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Display Letter by Letter</title>
+  <script>
+    function displayText() {
+      var text = "Hello, world!";
+      var container = document.getElementById("text-container");
+      var index = 0;
+
+      function displayNextLetter() {
+        container.innerHTML += text[index];
+        index++;
+
+        if (index < text.length) {
+          setTimeout(displayNextLetter, 100); // Adjust the delay between letters here (in milliseconds)
+        }
+      }
+
+      displayNextLetter();
+    }
+  </script>
+</head>
+<body onload="displayText()">
+  <div id="text-container"></div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Meeting Chat</title>
+    <style>
+        /* Style for the chat container */
+        #chat-container {
+            width: 300px;
+            height: 400px;
+            border: 1px solid #ccc;
+            overflow-y: fixed
+            ;
+        }
+
+        /* Style for chat messages */
+        .message {
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        /* Style for input box */
+        #message-input {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        body{
+    /* background: url(conference_bg.gif) ;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover; */
+    background-color: black;
+   }
+        
+    </style>
+</head>
+<body>
+    <div id="chat-container" style="color: white;">
+        <!-- Chat messages will be displayed here -->
+    </div>
+    <input type="text" id="message-input" placeholder="Type your message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        // Function to send a message and display it in the chat container
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const chatContainer = document.getElementById('chat-container');
+
+            if (messageInput.value.trim() !== '') {
+                const messageText = messageInput.value;
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.textContent = messageText;
+                chatContainer.appendChild(messageElement);
+
+                // Clear the input field
+                messageInput.value = '';
+
+                // Scroll to the bottom to show the latest message
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
