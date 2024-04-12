@@ -48,6 +48,7 @@ const server = http.createServer((req, res) => {
                     <button type="submit" id="uploadButton">Upload</button>
                 </form>
                 <div id="response"></div>
+                <a href="http://localhost:3001">Uploadtoblock</a>
             </body>
             </html>
         `;
