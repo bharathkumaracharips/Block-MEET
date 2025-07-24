@@ -1,4 +1,11 @@
 
+// Utility function to safely stringify objects with BigInt
+const safeJSONStringify = (obj) => {
+  return JSON.stringify(obj, (key, value) => 
+    typeof value === 'bigint' ? value.toString() : value
+  );
+};
+
 const http = require('http');
 const fs = require('fs');
 const formidable = require('formidable');
@@ -232,9 +239,9 @@ const server = http.createServer(async (req, res) => {
                             message: 'File uploaded and transaction recorded successfully'
                         };
                         
-                        console.log('Sending success response:', JSON.stringify(response, null, 2));
+                        console.log('Sending success response:', safeJSONStringify(response));
                         res.writeHead(200);
-                        res.end(JSON.stringify(response));
+                        res.end(safeJSONStringify(response));
                         return;
                     } catch (txError) {
                         console.error('Transaction error details:', {
