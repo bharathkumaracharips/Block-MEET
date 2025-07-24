@@ -2,7 +2,10 @@
 const http = require('http');
 const fs = require('fs');
 const formidable = require('formidable');
-const Moralis = require("moralis").default;
+const PinataClient = require('@pinata/sdk');
+require('dotenv').config();
+
+const pinata = new PinataClient({ pinataJWTKey: process.env.PINATA_JWT });
 
 const server = http.createServer((req, res) => {
     if (req.url === '/') {
@@ -54,69 +57,34 @@ const server = http.createServer((req, res) => {
         `;
         res.end(html);
     } else if (req.url === '/upload' && req.method === 'POST') {
-        // Handle file upload logic
         const form = new formidable.IncomingForm();
 
         form.parse(req, async (err, fields, files) => {
             if (err) {
-                console.error(err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'An error occurred while parsing the upload form.' }));
+                res.end(JSON.stringify({ error: 'Error parsing form' }));
                 return;
             }
 
-            console.log('files:', files); // Debugging
-
-            const file = files.file[0]; // Retrieve the first file object from the array
-
-            // Use the original filename from the file object
+            const file = files.file[0];
+            const filePath = file.filepath;
             const originalFilename = file.originalFilename;
 
-            // Ensure filePath is assigned before reading
-            const filePath = file.filepath; 
-
-            console.log('filePath:', filePath); // Debugging
-
-            // Read the file asynchronously to avoid blocking, handling errors within the callback
-            fs.readFile(filePath, { encoding: 'base64' }, (err, data) => {
-                if (err) {
-                    console.error(err);
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'An error occurred while reading the file.' }));
-                    return;
-                }
-
-                const uploadArray = [
-                    {
-                        // Use the original filename for the IPFS path
-                        path: originalFilename,
-                        content: data, // Use the file data read from fs.readFile
-                    },
-                ];
-
-                Moralis.start({
-                    apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjlkZjlhOWMwLTc4YWItNGY4Yi1hM2FkLWQ2ZWRhNWZjYTg0ZSIsIm9yZ0lkIjoiMzU4NTIyIiwidXNlcklkIjoiMzY4NDYwIiwidHlwZUlkIjoiNTZmOTg2OTktNmM4MS00ZmE0LTkyODYtYTU0YzhhMjJiMGE2IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE2OTU1MzIwMDIsImV4cCI6NDg1MTI5MjAwMn0.K0_4Rrdazc791I6yx5h0bGnpsGNfIb_ul93RvbEu6kw",
-                }).then(() => {
-                    Moralis.EvmApi.ipfs.uploadFolder({
-                        abi: uploadArray,
-                    }).then(response => {
-                        console.log(response.result);
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ result: response.result }));
-                    }).catch(err => {
-                        console.error("Upload error:", err); // Add this line for error logging
-                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: 'An error occurred during upload.' }));
-                    });
-                }).catch(err => {
-                    console.error("Moralis initialization error:", err); // Add this line for error logging
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'An error occurred during Moralis initialization.' }));
+            try {
+                const readableStream = fs.createReadStream(filePath);
+                const result = await pinata.pinFileToIPFS(readableStream, {
+                    pinataMetadata: { name: originalFilename }
                 });
-            });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ipfsHash: result.IpfsHash, gatewayUrl: `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}` }));
+            } catch (uploadErr) {
+                console.error('Error uploading to IPFS:', uploadErr);
+                console.error('File attempted:', originalFilename, 'at path:', filePath);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Error uploading to IPFS', details: uploadErr.message }));
+            }
         });
     } else {
-        // Handle other routes
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Page not found');
     }
