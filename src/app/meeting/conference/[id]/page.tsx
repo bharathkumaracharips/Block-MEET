@@ -13,6 +13,28 @@ import {
   MessageCircle,
   LogOut
 } from 'lucide-react'
+import { ethers } from "ethers";
+import UserLinkRegistry from "@/contracts/UserLinkRegistry.json"; // Adjust path if needed
+
+const CONTRACT_ADDRESS = "0x2AC7d00D15a72F88a97257E1B0fdC52fFd577d79"; // Your Ganache address
+
+async function storeMeetingOnChain(meetingId: string, ipfsUrl: string) {
+  if (!window.ethereum) {
+    alert("MetaMask is required!");
+    return;
+  }
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(CONTRACT_ADDRESS, UserLinkRegistry.abi, signer);
+
+  try {
+    const tx = await contract.addLink(meetingId, ipfsUrl);
+    await tx.wait();
+    alert("Meeting link stored on blockchain!");
+  } catch (err) {
+    alert("Failed to store on blockchain: " + (err as Error).message);
+  }
+}
 
 export default function ConferencePage() {
   const params = useParams()
